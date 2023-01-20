@@ -9,10 +9,10 @@ Eingabe-Datei jeglicher Befehle, anstatt der merge.py, ist hier stets `pages.pdf
 
 Eigenständige Skripte sind:
 
-- [annotation.py](/annotation.py)
-- [bookmarks.py](/bookmarks.py)
-- [certain_pages.py](/certain_pages.py)
-- [merge.py](/merge.py)
+- [annotation.py](/annotation.py) [README](#annotationpy)
+- [bookmarks.py](/bookmarks.py) [README](#bookmarkspy)
+- [certain_pages.py](/certain_pages.py) [README](#certain_pagespy)
+- [merge.py](/merge.py) [README](#mergepy)
 
 ## Annotation.py
 
@@ -98,3 +98,7 @@ foo@bar:~$ python certain_pages.py 5-10 12
 ## Merge.py
 
 Dieser Befehl fügt alle PDF-Dateien des Ordners zusammen. Die Reihenfolge wird nach den Namen der Dateien bestimmt. Ratsam hierbei ist die Dateien zu nummerieren. Sollte die Nummerierung dabei 10 oder größer erreichen müssen die Zahlen unter 10 mit einer führenden Null geschrieben werden.
+
+```console
+foo@bar:~$ python merge.py
+```
