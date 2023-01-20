@@ -1,4 +1,4 @@
-from PyPDF2 import PdfWriter
+from PyPDF2 import PdfWriter, PdfReader
 import sys
 
 def parseIntSet(tokens=[]):#https://stackoverflow.com/questions/712460/interpreting-number-ranges-in-python/712483#712483
@@ -28,6 +28,7 @@ for i in range(len(args)):
 
 writer = PdfWriter()
 writer.append('pages.pdf', pages=args)
+writer._info = PdfReader('pages.pdf').metadata
 
 with open("result-cp.pdf", "wb") as out:
     writer.write(out)
