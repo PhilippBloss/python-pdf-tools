@@ -8,6 +8,8 @@ from . import utils
 
 # constant
 maxTagLength = 6
+opening_Bracket = '['
+ending_Bracket = ']'
 
 def visitorFor(array: list, page: int) -> Callable[[Any, Any, Any, Any, Any], None] :
     array.append({}) # local
@@ -16,12 +18,12 @@ def visitorFor(array: list, page: int) -> Callable[[Any, Any, Any, Any, Any], No
             return
         text = text.strip()
 
-        if text == '[':
+        if text == opening_Bracket:
             array[0] = {'rec': [(textMatrix[4], textMatrix[5], fontDict, fontSize)], 'text': '', 'page': page}
-        elif text.startswith('['):
-            save = ']' in text
+        elif text.startswith(opening_Bracket):
+            save = ending_Bracket in text
             if save:
-                text = text[0:text.index(']')]
+                text = text[0:text.index(ending_Bracket)]
             if len(text) > maxTagLength+1: # Tag + [
                 array[0] = {}
                 return
@@ -30,8 +32,8 @@ def visitorFor(array: list, page: int) -> Callable[[Any, Any, Any, Any, Any], No
                 array.append(array[0])
                 array[0] = {}
         elif 'rec' in array[0]:
-            if ']' in text:
-                text = text[0:text.index(']')]
+            if ending_Bracket in text:
+                text = text[0:text.index(ending_Bracket)]
                 if len(text) + len(array[0]['text']) > maxTagLength: # Not Tag
                     array[0] = {}
                     return
@@ -67,7 +69,7 @@ def buildRec(source : dict):
     (fx, fy, fontDic, fontSize) = source['rec'][0]
     (lx, ly, fontDic, fontSize) = source['rec'][len(source['rec'])-1]
 
-    lx += fontDic['/Widths'][93-fontDic['/FirstChar']]/100 # 93 = ascii for ]
+    lx += fontDic['/Widths'][ord(ending_Bracket)-fontDic['/FirstChar']]/100
     ly += fontSize
 
     fy -= fontDic['/FontDescriptor']['/CapHeight']/100
