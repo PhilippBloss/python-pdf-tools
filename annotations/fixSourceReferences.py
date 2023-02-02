@@ -19,7 +19,7 @@ def visitorFor(array: list, page: int) -> Callable[[Any, Any, Any, Any, Any], No
         text = text.strip()
 
         if text == opening_Bracket:
-            array[0] = {'rec': [(textMatrix[4], textMatrix[5], fontDict, fontSize)], 'text': '', 'page': page}
+            array[0] = {'rec': [(textMatrix[4], textMatrix[5], fontDict, fontSize, text)], 'text': '', 'page': page}
         elif text.startswith(opening_Bracket):
             save = ending_Bracket in text
             if save:
@@ -27,7 +27,7 @@ def visitorFor(array: list, page: int) -> Callable[[Any, Any, Any, Any, Any], No
             if len(text) > maxTagLength+1: # Tag + [
                 array[0] = {}
                 return
-            array[0] = {'rec': [(textMatrix[4], textMatrix[5], fontDict, fontSize)], 'text': text[1:len(text)], 'page': page}
+            array[0] = {'rec': [(textMatrix[4], textMatrix[5], fontDict, fontSize, text)], 'text': text[1:len(text)], 'page': page}
             if save:
                 array.append(array[0])
                 array[0] = {}
@@ -38,7 +38,7 @@ def visitorFor(array: list, page: int) -> Callable[[Any, Any, Any, Any, Any], No
                     array[0] = {}
                     return
                 array[0]['text'] += text
-                array[0]['rec'].append((textMatrix[4], textMatrix[5], fontDict, fontSize))
+                array[0]['rec'].append((textMatrix[4], textMatrix[5], fontDict, fontSize, text))
                 array.append(array[0])
                 array[0] = {}
             else:
@@ -46,7 +46,7 @@ def visitorFor(array: list, page: int) -> Callable[[Any, Any, Any, Any, Any], No
                     array[0] = {}
                     return
                 array[0]['text'] += text
-                array[0]['rec'].append((textMatrix[4], textMatrix[5], fontDict, fontSize))
+                array[0]['rec'].append((textMatrix[4], textMatrix[5], fontDict, fontSize, text))
 
     return visit
 
@@ -66,10 +66,16 @@ def filterAnnotated(page : PageObject, array : list) -> list :
     return array
 
 def buildRec(source : dict):
-    (fx, fy, fontDic, fontSize) = source['rec'][0]
-    (lx, ly, fontDic, fontSize) = source['rec'][len(source['rec'])-1]
+    (fx, fy, fontDic, fontSize, text) = source['rec'][0]
+    (lx, ly, fontDic2, fontSize2, text2) = source['rec'][len(source['rec'])-1]
 
-    lx += fontDic['/Widths'][ord(ending_Bracket)-fontDic['/FirstChar']]/100
+    def fontWeight(char):
+        return fontDic['/Widths'][ord(char)-fontDic['/FirstChar']]/100
+
+    for x in text2:
+        lx += fontWeight(x)
+    
+    lx += fontWeight(ending_Bracket)
     ly += fontSize
 
     fy -= fontDic['/FontDescriptor']['/CapHeight']/100
@@ -133,12 +139,12 @@ def fixWordSourceReferences(writer: PdfWriter, skip_input: bool, index_index: in
             continue
         
         buildRec(source)
-        anno = AnnotationBuilder.link(
+        anno = utils.buildInternalLink(
                     rect = source['rec'],
                     target_page_index = indexSource['page'],
-                    fit=Fit.xyz(left = indexSource['rec'][0][0], top = indexSource['rec'][0][1]+indexSource['rec'][0][3]))
-
-        writer.add_annotation(page_number=source['page'], annotation=anno)
+                    left = indexSource['rec'][0][0], top = indexSource['rec'][0][1]+indexSource['rec'][0][3], zoom=0)
+        
+        utils.add_annotation(writer, page_number=source['page'], annotation=anno)
 
     
     with open("result-an.pdf", "wb") as out:

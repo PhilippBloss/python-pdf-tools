@@ -1,6 +1,7 @@
 from PyPDF2 import PdfWriter
+from PyPDF2._writer import _pdf_objectify
 from PyPDF2.generic import AnnotationBuilder, Fit, NameObject
-from PyPDF2.generic._data_structures import ArrayObject
+from PyPDF2.generic._data_structures import ArrayObject, DictionaryObject, NumberObject, Destination
 
 from operator import itemgetter
 from collections.abc import Callable
@@ -97,10 +98,10 @@ def fixWordActionsIntoDest(writer: PdfWriter, save: bool):
                 print(index+1)
                 rec = annot['runRec']
 
-                annotation = AnnotationBuilder.link(
+                annotation = utils.buildInternalLink(
                     rect = annot['obj'][utils.RECTANGLE],
                     target_page_index = index,
-                    fit=Fit.xyz(left = rec[4], top = rec[5]))
+                    left = rec[4], top = rec[5], zoom=0)# fit_args
                 
                 # save for later if multiple were found
                 if 'builded' in annot:
@@ -119,7 +120,7 @@ def fixWordActionsIntoDest(writer: PdfWriter, save: bool):
             elif len(builded) == 1:
                 # write single found
                 page, ann = builded.popitem()
-                writer.add_annotation(page_number=annot['page'], annotation=ann)
+                utils.add_annotation(writer, page_number=annot['page'], annotation=ann)
                 next = page
             else:
                 # wait for valid input
@@ -128,7 +129,7 @@ def fixWordActionsIntoDest(writer: PdfWriter, save: bool):
                     input = int(input())
                     if input in builded:
                         page, anno = builded[input]
-                        writer.add_annotation(page_number=annot['page'], annotation=anno)
+                        utils.add_annotation(writer, page_number=annot['page'], annotation=anno)
                         next = page
                         break
                     else:
